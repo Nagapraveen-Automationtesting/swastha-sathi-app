@@ -49,7 +49,7 @@ const HomeScreen = () => {
         
         onDismiss={closeMenu}
         anchor={
-          <Image source={require('../assets/profilePic.png')} style={styles.avatar} />
+          <Image source={require('../assets/images/profilePic.png')} style={styles.avatar} />
         }
       >
         <Menu.Item onPress={() => handleLogOut()} title="Logout" />
@@ -79,7 +79,7 @@ const HomeScreen = () => {
       {/* Promo Banner */}
       <View style={styles.bestServices}>
       <ImageBackground 
-      source={require('../assets/homePageBG.png')} 
+      source={require('../assets/images/homePageBG.png')} 
       style={styles.banner}
       imageStyle={styles.imageStyle} // For rounded corners
     >

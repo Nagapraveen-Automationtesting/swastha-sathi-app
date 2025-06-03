@@ -11,7 +11,7 @@ export default function WelcomeScreen({ navigation }: WelcomeScreenProps) {
   return (
     <View style={styles.container}>
       {/* Logo */}
-      <Image source={require('../../assets/welcomeLogo.png')} style={styles.logo} />
+      <Image source={require('../../assets/images/welcomeLogo.png')} style={styles.logo} />
 
       {/* App Name */}
       <Text style={styles.appName}>

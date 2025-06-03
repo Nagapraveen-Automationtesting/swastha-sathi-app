@@ -25,7 +25,7 @@ const ReportsScreen = () => {
       {/* Report Summary */}
       <View style={styles.heartContainer}>
         <ImageBackground 
-              source={require('../assets/heartRateBG.png')} 
+              source={require('../assets/images/heartRateBG.png')} 
               style={styles.banner}
               imageStyle={styles.imageStyle} // For rounded corners
             >

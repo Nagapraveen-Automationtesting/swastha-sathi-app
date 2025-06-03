@@ -65,9 +65,11 @@
 
 import axios from "axios";
 import { Alert } from "react-native";
+import { BASE_URL } from "../assets/Constants";
 
 // Base API URL (Change as per your backend)
-const BASE_URL = "http://10.0.2.2:8001";
+// const BASE_URL = "http://10.0.2.2:8003";
+//  const BASE_URL = BASE_URL + "http://192.168.1.6:8003"; // Change to your backend's local IP
 
 // Create Axios instance
 const apiClient = axios.create({
