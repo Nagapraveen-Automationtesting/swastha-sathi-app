@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Alert, View } from 'react-native';
 import { Menu, Divider, IconButton } from 'react-native-paper';
 import * as DocumentPicker from 'expo-document-picker';
-import { BASE_URL } from '../assets/Constants';
+import { BASE_URL, FILE_UPLOAD_GCP_URL, FILE_UPLOAD_URL } from '../assets/Constants';
 
 export default function MenuButton() {
   const [visible, setVisible] = useState(false);
@@ -10,35 +10,51 @@ export default function MenuButton() {
   const openMenu = () => setVisible(true);
   const closeMenu = () => setVisible(false);
 
-  const uploadToGCP = async (file: any): Promise<string | null> => {
+const uploadToGCP = async (file: any): Promise<string | null> => {
   try {
-    // 1. Request a signed URL from your backend (include filename)
-    const getSignedUrlRes = await fetch(`${BASE_URL}/upload/get-signed-url`, {
+    const mimeType = file.mimeType || 'application/pdf'; // fallback just in case
+
+    // 1. Request signed URL
+    const getSignedUrlRes = await fetch(`${FILE_UPLOAD_GCP_URL}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fileName: file.name, fileType: file.mimeType }),
+      body: JSON.stringify({ fileName: file.name, fileType: mimeType }),
     });
 
     const { signedUrl, publicUrl } = await getSignedUrlRes.json();
+    console.log("Signed URL:", signedUrl);
 
-    // 2. Upload the file to GCP using the signed URL
+    // 2. Convert file URI to blob (works in React Native)
+    // const blob = await fetch(file.uri).then(res => res.blob());
+    const fileRes = await fetch(file.uri);
+    const fileBlob = await fileRes.blob();
+
+
+    // 3. Upload with exact Content-Type used in signing
     const uploadRes = await fetch(signedUrl, {
       method: 'PUT',
-      headers: {
-        'Content-Type': file.mimeType || 'application/octet-stream',
-      },
-      body: await fetch(file.uri).then(res => res.blob()),
+
+      body: fileBlob,
     });
 
-    if (!uploadRes.ok) throw new Error('Upload to GCP failed');
+    const uploadText = await uploadRes.text();
+    console.log("Upload response:", uploadText);
 
-    return publicUrl; // GCS file path (e.g., gs:// or https://storage.googleapis.com/...)
+
+    if (!uploadRes.ok) {
+      const errText = await uploadRes.text();
+      console.error("Upload failed:", errText);
+      throw new Error(`Upload failed with status: ${uploadRes.status}`);
+    }
+
+    return publicUrl;
   } catch (err) {
     console.error('GCP Upload Error:', err);
     Alert.alert('Error', 'File upload to GCP failed.');
     return null;
   }
 };
+
 
 
 // import * as DocumentPicker from 'expo-document-picker';
@@ -72,7 +88,7 @@ const handleUploadReport = async () => {
     const gcpUrl = await uploadToGCP(file);
     if (!gcpUrl) return;
 
-    const response = await fetch(`${BASE_URL}/upload/upload-report`, {
+    const response = await fetch(`${FILE_UPLOAD_URL}`, {
       method: 'POST',
       headers: {
         // 'Content-Type': 'multipart/form-data',
